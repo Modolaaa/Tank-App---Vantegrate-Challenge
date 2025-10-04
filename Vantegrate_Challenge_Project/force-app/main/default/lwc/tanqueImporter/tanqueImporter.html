@@ -1,0 +1,238 @@
+<template>
+    <lightning-card title="Importador de Tanques Industriales" icon-name="custom:custom63">
+        <div class="slds-card__body slds-card__body_inner">
+            
+            <!-- Pantalla 1: Selección o Creación de Tipo de Tanque -->
+            <template if:true={isPantallaUno}>
+                <div class="slds-text-heading_medium slds-m-bottom_medium">
+                    Paso 1: Configuración del Tipo de Tanque
+                </div>
+                
+                <!-- Opción 1: Seleccionar tipo existente -->
+                <div class="slds-box slds-m-bottom_medium">
+                    <lightning-input 
+                        type="checkbox" 
+                        label="Seleccionar un tipo de tanque existente"
+                        checked={seleccionarExistente}
+                        onchange={handleSeleccionExistenteChange}>
+                    </lightning-input>
+                    
+                    <template if:true={seleccionarExistente}>
+                        <div class="slds-m-top_small">
+                            <lightning-combobox
+                                name="tipoTanque"
+                                label="Tipo de Tanque"
+                                value={tipoTanqueSeleccionado}
+                                placeholder="Seleccione un tipo de tanque"
+                                options={tiposTanqueOptions}
+                                onchange={handleTipoTanqueChange}
+                                required>
+                            </lightning-combobox>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Opción 2: Crear nuevo tipo -->
+                <div class="slds-box slds-m-bottom_medium">
+                    <lightning-input 
+                        type="checkbox" 
+                        label="Crear un nuevo tipo de tanque"
+                        checked={crearNuevo}
+                        onchange={handleCrearNuevoChange}>
+                    </lightning-input>
+                    
+                    <template if:true={crearNuevo}>
+                        <div class="slds-m-top_small">
+                            <lightning-layout multiple-rows>
+                                <lightning-layout-item size="6" padding="around-small">
+                                    <lightning-input
+                                        label="Capacidad"
+                                        type="number"
+                                        value={nuevoTipo.capacidad}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="capacidad"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="6" padding="around-small">
+                                    <lightning-input
+                                        label="Peso"
+                                        type="number"
+                                        value={nuevoTipo.peso}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="peso"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="6" padding="around-small">
+                                    <lightning-combobox
+                                        label="Marca"
+                                        value={nuevoTipo.marca}
+                                        placeholder="Seleccione una marca"
+                                        options={marcaOptions}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="marca"
+                                        required>
+                                    </lightning-combobox>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="6" padding="around-small">
+                                    <lightning-input
+                                        label="Precio de Lista"
+                                        type="number"
+                                        value={nuevoTipo.precioLista}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="precioLista"
+                                        formatter="currency"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="4" padding="around-small">
+                                    <lightning-input
+                                        label="Alto"
+                                        type="number"
+                                        value={nuevoTipo.alto}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="alto"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="4" padding="around-small">
+                                    <lightning-input
+                                        label="Ancho"
+                                        type="number"
+                                        value={nuevoTipo.ancho}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="ancho"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="4" padding="around-small">
+                                    <lightning-input
+                                        label="Profundidad"
+                                        type="number"
+                                        value={nuevoTipo.profundidad}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="profundidad"
+                                        required>
+                                    </lightning-input>
+                                </lightning-layout-item>
+                                
+                                <lightning-layout-item size="12" padding="around-small">
+                                    <lightning-combobox
+                                        label="Material"
+                                        value={nuevoTipo.material}
+                                        placeholder="Seleccione un material"
+                                        options={materialOptions}
+                                        onchange={handleNuevoTipoChange}
+                                        data-field="material"
+                                        required>
+                                    </lightning-combobox>
+                                </lightning-layout-item>
+                            </lightning-layout>
+                        </div>
+                    </template>
+                </div>
+
+                <template if:true={errorMessage}>
+                    <div class="slds-text-color_error slds-m-bottom_small">
+                        {errorMessage}
+                    </div>
+                </template>
+
+                <div class="slds-text-align_right">
+                    <lightning-button 
+                        variant="brand" 
+                        label="Siguiente" 
+                        onclick={handleSiguiente}
+                        class="slds-m-top_medium">
+                    </lightning-button>
+                </div>
+            </template>
+
+            <!-- Pantalla 2: Carga de archivo CSV -->
+            <template if:true={isPantallaDos}>
+                <div class="slds-text-heading_medium slds-m-bottom_medium">
+                    Paso 2: Importar Tanques desde CSV
+                </div>
+
+                <div class="slds-box slds-m-bottom_medium">
+                    <p class="slds-m-bottom_small">
+                        Seleccione un archivo CSV con el siguiente formato:
+                    </p>
+                    <p class="slds-text-body_small slds-text-color_weak">
+                        Nro_Serie,FechaFabricacion,Ubicacion,Observaciones
+                    </p>
+                </div>
+
+                <input 
+                    type="file" 
+                    accept=".csv" 
+                    onchange={handleFileUpload}
+                    class="slds-m-bottom_small"
+                />
+
+                <template if:true={archivoSeleccionado}>
+                    <div class="slds-text-color_success slds-m-top_small">
+                        Archivo cargado: {nombreArchivo}
+                    </div>
+                </template>
+
+                <template if:true={errorMessage}>
+                    <div class="slds-text-color_error slds-m-top_small">
+                        {errorMessage}
+                    </div>
+                </template>
+
+                <div class="slds-text-align_right slds-m-top_medium">
+                    <lightning-button 
+                        label="Atrás" 
+                        onclick={handleAtras}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Importar Tanques" 
+                        onclick={handleImportar}
+                        disabled={isImportando}>
+                    </lightning-button>
+                </div>
+
+                <template if:true={isImportando}>
+                    <div class="slds-m-top_medium">
+                        <lightning-spinner alternative-text="Importando..."></lightning-spinner>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Pantalla 3: Confirmación -->
+            <template if:true={isPantallaTres}>
+                <div class="slds-text-align_center slds-m-vertical_large">
+                    <lightning-icon 
+                        icon-name="action:approval" 
+                        size="large" 
+                        alternative-text="Éxito">
+                    </lightning-icon>
+                    <div class="slds-text-heading_medium slds-m-top_medium">
+                        Proceso de importación de tanques finalizado
+                    </div>
+                    <div class="slds-text-body_regular slds-m-top_small">
+                        Se han cargado {cantidadTanquesImportados} tanques en el sistema correctamente.
+                    </div>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Finalizar" 
+                        onclick={handleFinalizar}
+                        class="slds-m-top_large">
+                    </lightning-button>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>
